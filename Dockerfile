@@ -5,7 +5,6 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Dependências de sistema para psycopg2 e PyMuPDF
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gcc \
@@ -18,11 +17,10 @@ COPY . .
 
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod
 
-# collectstatic precisa de SECRET_KEY mas não de banco
 RUN SECRET_KEY=build-placeholder python manage.py collectstatic --noinput
 
-RUN chmod +x entrypoint.sh
+RUN printf '#!/bin/bash\nset -e\npython manage.py migrate --noinput\nexec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120\n' > /app/start.sh && chmod +x /app/start.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["bash", "entrypoint.sh"]
+CMD ["/bin/bash", "/app/start.sh"]
