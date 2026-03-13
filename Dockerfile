@@ -21,8 +21,8 @@ ENV DJANGO_SETTINGS_MODULE=config.settings.prod
 # collectstatic precisa de SECRET_KEY mas não de banco
 RUN SECRET_KEY=build-placeholder python manage.py collectstatic --noinput
 
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-ENV PORT=8000
-
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT} --workers 3 --timeout 120
+ENTRYPOINT ["bash", "entrypoint.sh"]
