@@ -19,8 +19,6 @@ ENV DJANGO_SETTINGS_MODULE=config.settings.prod
 
 RUN SECRET_KEY=build-placeholder python manage.py collectstatic --noinput
 
-RUN printf '#!/bin/bash\nset -e\npython manage.py migrate --noinput\nexec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120\n' > /app/start.sh && chmod +x /app/start.sh
-
 EXPOSE 8000
 
-CMD ["/bin/bash", "/app/start.sh"]
+CMD ["python", "-c", "import subprocess, os; port = os.environ.get('PORT', '8000'); subprocess.run(['python', 'manage.py', 'migrate', '--noinput']); os.execvp('gunicorn', ['gunicorn', 'config.wsgi:application', '--bind', f'0.0.0.0:{port}', '--workers', '3', '--timeout', '120'])"]
