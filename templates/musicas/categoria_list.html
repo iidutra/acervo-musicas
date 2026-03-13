@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias Litúrgicas - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Categorias</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Categorias Litúrgicas</h1>
+        <p class="page-subtitle">Gerencie as categorias de classificação das músicas.</p>
+    </div>
+    <a href="{% url 'musicas:categoria_create' %}" class="btn btn-primary">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Nova Categoria
+    </a>
+</div>
+
+{% if categorias %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th class="hide-mobile">Descrição</th>
+                <th>Ordem</th>
+                <th>Ativo</th>
+                <th style="text-align:right">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categoria in categorias %}
+            <tr>
+                <td style="font-weight:600;">{{ categoria.nome }}</td>
+                <td class="hide-mobile">
+                    <span class="truncate-2" style="max-width:300px;display:block;">{{ categoria.descricao|default:"-"|truncatechars:80 }}</span>
+                </td>
+                <td>{{ categoria.ordem }}</td>
+                <td>
+                    {% if categoria.ativo %}
+                    <span class="badge badge-success">Ativo</span>
+                    {% else %}
+                    <span class="badge badge-danger">Inativo</span>
+                    {% endif %}
+                </td>
+                <td style="text-align:right;">
+                    <a href="{% url 'musicas:categoria_update' categoria.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        </div>
+        <p class="empty-state-title">Nenhuma categoria cadastrada</p>
+        <p class="empty-state-text">Crie categorias para organizar suas músicas litúrgicas.</p>
+        <a href="{% url 'musicas:categoria_create' %}" class="btn btn-primary">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Nova Categoria
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Acervo - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Importar</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Importar Acervo</h1>
+    <p class="page-subtitle">Importe músicas e dados a partir de um arquivo.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <!-- Form -->
+    <div class="card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="form-error" style="margin-bottom: 1.5rem;">
+                <strong>Corrija os erros abaixo:</strong>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_arquivo" class="form-label">Arquivo <span style="color: var(--color-danger);">*</span></label>
+                <label for="id_arquivo" class="form-file">
+                    <svg class="form-file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                    <span class="form-file-text">Arraste um arquivo ou clique para selecionar</span>
+                    <span class="form-file-name"></span>
+                    <input type="file" name="arquivo" id="id_arquivo" accept=".csv,.xlsx,.xls,.json,.zip" hidden>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="id_tipo_importacao" class="form-label">Tipo de Importação <span style="color: var(--color-danger);">*</span></label>
+                <select name="tipo_importacao" id="id_tipo_importacao" class="form-input">
+                    {% for value, label in form.tipo_importacao.field.choices %}
+                    <option value="{{ value }}" {% if form.tipo_importacao.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+                <a href="{% url 'importacao_exportacao:importacao_historico' %}" style="font-size: 0.875rem; color: var(--color-primary);">Histórico de Importações</a>
+                <button type="submit" class="btn btn-primary" data-loading-text="Importando...">Importar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Instructions -->
+    <div class="card" style="background: var(--color-info-bg, #eff6ff); border-color: var(--color-info-border, #bfdbfe);">
+        <h3 style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">Instruções de Importação</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.875rem;">
+            <div>
+                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">CSV / Excel</h4>
+                <ul style="list-style: disc; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li>Coluna obrigatória: <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">titulo</code></li>
+                    <li>Colunas opcionais: <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">tom_principal</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">subtitulo</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">letra</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">observacoes</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">categorias</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">tags</code></li>
+                    <li>Categorias e tags separadas por vírgula</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">ZIP</h4>
+                <ul style="list-style: disc; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li>Estrutura esperada:</li>
+                    <li style="margin-left: 1rem;"><code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">musicas.csv</code> + pastas <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">/pdfs</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">/audios</code>, <code style="background: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem;">/cifras</code></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">JSON</h4>
+                <ul style="list-style: disc; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                    <li>Formato de backup/restauração</li>
+                    <li>Gerado pela funcionalidade de exportação</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.form-file input[type="file"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const nameEl = this.closest('.form-file').querySelector('.form-file-name');
+        if (this.files.length) {
+            nameEl.textContent = this.files[0].name;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar Link - {{ musica.titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_list' %}">Músicas</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_detail' musica.pk %}">{{ musica.titulo }}</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Adicionar Link</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Adicionar Link Externo</h1>
+    <p class="page-subtitle">Música: {{ musica.titulo }}</p>
+</div>
+
+<div class="card" style="max-width: 42rem;">
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="form-error" style="margin-bottom: 1.5rem;">
+            <strong>Corrija os erros abaixo:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <p class="form-help" style="margin-bottom: 1.5rem;">Links são apenas referência — nenhum conteúdo será baixado.</p>
+
+        <!-- URL e Tipo -->
+        <fieldset style="margin-bottom: 1.5rem;">
+            <legend style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">URL e Tipo</legend>
+
+            <div class="form-group">
+                <label for="id_url" class="form-label">URL <span style="color: var(--color-danger);">*</span></label>
+                <input type="url" name="url" id="id_url" value="{{ form.url.value|default:'' }}" class="form-input" placeholder="https://..." required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="id_provider" class="form-label">Provider</label>
+                    <select name="provider" id="id_provider" class="form-input">
+                        {% for value, label in form.provider.field.choices %}
+                        <option value="{{ value }}" {% if form.provider.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_tipo_conteudo" class="form-label">Tipo de Conteúdo</label>
+                    <select name="tipo_conteudo" id="id_tipo_conteudo" class="form-input">
+                        {% for value, label in form.tipo_conteudo.field.choices %}
+                        <option value="{{ value }}" {% if form.tipo_conteudo.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Detalhes -->
+        <fieldset style="margin-bottom: 1.5rem;">
+            <legend style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">Detalhes</legend>
+
+            <div class="form-group">
+                <label for="id_titulo_externo" class="form-label">Título Externo</label>
+                <input type="text" name="titulo_externo" id="id_titulo_externo" value="{{ form.titulo_externo.value|default:'' }}" class="form-input" placeholder="Título do conteúdo externo">
+            </div>
+
+            <div class="form-group">
+                <label for="id_embed_url" class="form-label">Embed URL</label>
+                <input type="url" name="embed_url" id="id_embed_url" value="{{ form.embed_url.value|default:'' }}" class="form-input" placeholder="URL para incorporação (embed)">
+            </div>
+        </fieldset>
+
+        <!-- Metadados -->
+        <fieldset style="margin-bottom: 1.5rem;">
+            <legend style="font-weight: 600; font-size: 0.875rem; margin-bottom: 0.75rem;">Metadados</legend>
+
+            <div class="form-group">
+                <label for="id_external_id" class="form-label">ID Externo</label>
+                <input type="text" name="external_id" id="id_external_id" value="{{ form.external_id.value|default:'' }}" class="form-input" placeholder="ID do vídeo/conteúdo na plataforma">
+            </div>
+
+            <div class="form-group">
+                <label for="id_thumbnail_url" class="form-label">URL da Thumbnail</label>
+                <input type="url" name="thumbnail_url" id="id_thumbnail_url" value="{{ form.thumbnail_url.value|default:'' }}" class="form-input" placeholder="URL da imagem de miniatura">
+            </div>
+
+            <div class="form-group">
+                <label for="id_observacoes" class="form-label">Observações</label>
+                <textarea name="observacoes" id="id_observacoes" rows="3" class="form-input" placeholder="Observações adicionais...">{{ form.observacoes.value|default:'' }}</textarea>
+            </div>
+        </fieldset>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+            <a href="{% url 'musicas:musica_detail' musica.pk %}" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

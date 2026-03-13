@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Músicas - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Músicas</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            Músicas
+            {% if page_obj %}<span class="badge badge-primary" style="margin-left:0.5rem;font-size:0.8rem;">{{ paginator.count }}</span>{% endif %}
+        </h1>
+        <p class="page-subtitle">Gerencie o acervo de músicas litúrgicas.</p>
+    </div>
+    <a href="{% url 'musicas:musica_create' %}" class="btn btn-primary">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Nova Música
+    </a>
+</div>
+
+<!-- Filters -->
+<details class="filter-bar"{% if filter_form.busca.value or filter_form.tom.value or filter_form.categoria.value or filter_form.tag.value or filter_form.ativo.value or filter_form.tem_pdf.value or filter_form.tem_audio.value or filter_form.tem_cifra.value %} open{% endif %}>
+    <summary>
+        <svg class="filter-icon h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
+        Filtros
+    </summary>
+    <form method="GET" action="{% url 'musicas:musica_list' %}">
+        <div class="filter-grid">
+            <div class="form-group" style="margin-bottom:0">
+                <label for="id_busca" class="form-label">Busca</label>
+                <input type="text" name="busca" id="id_busca" value="{{ filter_form.busca.value|default:'' }}" placeholder="Título, subtítulo, letra..." class="form-input">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="id_tom" class="form-label">Tom</label>
+                <select name="tom" id="id_tom" class="form-input">
+                    <option value="">Todos</option>
+                    {% for value, label in filter_form.tom.field.choices %}
+                        {% if value %}<option value="{{ value }}" {% if filter_form.tom.value == value %}selected{% endif %}>{{ label }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="id_categoria" class="form-label">Categoria</label>
+                <select name="categoria" id="id_categoria" class="form-input">
+                    <option value="">Todas</option>
+                    {% for value, label in filter_form.categoria.field.choices %}
+                        {% if value %}<option value="{{ value }}" {% if filter_form.categoria.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="id_tag" class="form-label">Tag</label>
+                <select name="tag" id="id_tag" class="form-input">
+                    <option value="">Todas</option>
+                    {% for value, label in filter_form.tag.field.choices %}
+                        {% if value %}<option value="{{ value }}" {% if filter_form.tag.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label for="id_ativo" class="form-label">Status</label>
+                <select name="ativo" id="id_ativo" class="form-input">
+                    <option value="">Todos</option>
+                    <option value="1" {% if filter_form.ativo.value == "1" %}selected{% endif %}>Ativo</option>
+                    <option value="0" {% if filter_form.ativo.value == "0" %}selected{% endif %}>Inativo</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:1rem;padding:0.75rem 0 0;">
+            <label class="checkbox-item" style="border:none;padding:0.25rem 0.5rem;">
+                <input type="checkbox" name="tem_pdf" value="1" {% if filter_form.tem_pdf.value %}checked{% endif %}>
+                Tem PDF
+            </label>
+            <label class="checkbox-item" style="border:none;padding:0.25rem 0.5rem;">
+                <input type="checkbox" name="tem_audio" value="1" {% if filter_form.tem_audio.value %}checked{% endif %}>
+                Tem Áudio
+            </label>
+            <label class="checkbox-item" style="border:none;padding:0.25rem 0.5rem;">
+                <input type="checkbox" name="tem_cifra" value="1" {% if filter_form.tem_cifra.value %}checked{% endif %}>
+                Tem Cifra
+            </label>
+        </div>
+
+        <div class="filter-actions">
+            <a href="{% url 'musicas:musica_list' %}" class="btn btn-ghost btn-sm">Limpar</a>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</details>
+
+{% if page_obj %}
+<!-- Table -->
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th class="hide-mobile">Tom</th>
+                <th class="hide-mobile">Categorias</th>
+                <th>Status</th>
+                <th style="text-align:right">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for musica in page_obj %}
+            <tr>
+                <td>
+                    <a href="{% url 'musicas:musica_detail' musica.pk %}" style="font-weight:600;color:var(--color-primary);text-decoration:none;">{{ musica.titulo }}</a>
+                    {% if musica.subtitulo %}
+                    <div style="font-size:0.75rem;color:var(--color-text-secondary);margin-top:2px;">{{ musica.subtitulo }}</div>
+                    {% endif %}
+                </td>
+                <td class="hide-mobile">
+                    {% if musica.get_tom_principal_display %}
+                    <span class="badge badge-primary">{{ musica.get_tom_principal_display }}</span>
+                    {% else %}-{% endif %}
+                </td>
+                <td class="hide-mobile">
+                    <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+                        {% for cat in musica.categorias.all %}
+                        <span class="badge badge-gray">{{ cat.nome }}</span>
+                        {% empty %}-{% endfor %}
+                    </div>
+                </td>
+                <td>
+                    {% if musica.ativo %}
+                    <span class="badge badge-success">Ativo</span>
+                    {% else %}
+                    <span class="badge badge-danger">Inativo</span>
+                    {% endif %}
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <a href="{% url 'musicas:musica_detail' musica.pk %}" class="btn btn-ghost btn-sm">Ver</a>
+                    <a href="{% url 'musicas:musica_update' musica.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+    </a>
+    {% endif %}
+
+    {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+        <span class="current">{{ num }}</span>
+        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+        {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+        <span class="ellipsis">...</span>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty State -->
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+        </div>
+        <p class="empty-state-title">Nenhuma música encontrada</p>
+        <p class="empty-state-text">Comece adicionando a primeira música ao seu acervo litúrgico.</p>
+        <a href="{% url 'musicas:musica_create' %}" class="btn btn-primary">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Nova Música
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

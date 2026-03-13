@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object.pk %}Editar Repertório{% else %}Novo Repertório{% endif %} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'repertorios:repertorio_list' %}">Repertórios</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{% if object.pk %}Editar{% else %}Novo{% endif %}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{% if object.pk %}Editar Repertório{% else %}Novo Repertório{% endif %}</h1>
+    <p class="page-subtitle">{% if object.pk %}Atualize os dados do repertório.{% else %}Preencha os dados para criar um novo repertório.{% endif %}</p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.errors or formset.errors %}
+    <div class="form-error" style="margin-bottom: 1.5rem;">
+        <strong>Corrija os erros abaixo:</strong>
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% if formset.non_form_errors %}
+                {% for error in formset.non_form_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Dados do Repertório -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <h2 class="section-title" style="margin-bottom: 1rem;">Dados do Repertório</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="id_nome" class="form-label">Nome <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" name="nome" id="id_nome" value="{{ form.nome.value|default:'' }}" class="form-input" placeholder="Nome do repertório" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_data_celebracao" class="form-label">Data da Celebração</label>
+                <input type="date" name="data_celebracao" id="id_data_celebracao" value="{{ form.data_celebracao.value|default:'' }}" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="id_tipo_celebracao" class="form-label">Tipo de Celebração</label>
+                <select name="tipo_celebracao" id="id_tipo_celebracao" class="form-input">
+                    {% for value, label in form.tipo_celebracao.field.choices %}
+                    <option value="{{ value }}" {% if form.tipo_celebracao.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="id_observacoes" class="form-label">Observações</label>
+                <textarea name="observacoes" id="id_observacoes" rows="3" class="form-input" placeholder="Observações sobre o repertório...">{{ form.observacoes.value|default:'' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Músicas -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+        <h2 class="section-title" style="margin-bottom: 1rem;">Músicas</h2>
+
+        {{ formset.management_form }}
+
+        <div id="formset-container" style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for fs_form in formset %}
+            <div style="border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem;">
+                {% if fs_form.errors %}
+                <div class="form-error" style="margin-bottom: 0.75rem;">
+                    <ul>
+                        {% for field in fs_form %}
+                            {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {{ fs_form.id }}
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="{{ fs_form.musica.id_for_label }}" class="form-label">Música</label>
+                        <select name="{{ fs_form.musica.html_name }}" id="{{ fs_form.musica.id_for_label }}" class="form-input">
+                            {% for value, label in fs_form.musica.field.choices %}
+                            <option value="{{ value }}" {% if fs_form.musica.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ fs_form.ordem.id_for_label }}" class="form-label">Ordem</label>
+                        <input type="number" name="{{ fs_form.ordem.html_name }}" id="{{ fs_form.ordem.id_for_label }}" value="{{ fs_form.ordem.value|default:'' }}" class="form-input" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ fs_form.categoria_no_repertorio.id_for_label }}" class="form-label">Categoria</label>
+                        <select name="{{ fs_form.categoria_no_repertorio.html_name }}" id="{{ fs_form.categoria_no_repertorio.id_for_label }}" class="form-input">
+                            {% for value, label in fs_form.categoria_no_repertorio.field.choices %}
+                            <option value="{{ value }}" {% if fs_form.categoria_no_repertorio.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ fs_form.tom_no_repertorio.id_for_label }}" class="form-label">Tom</label>
+                        <select name="{{ fs_form.tom_no_repertorio.html_name }}" id="{{ fs_form.tom_no_repertorio.id_for_label }}" class="form-input">
+                            {% for value, label in fs_form.tom_no_repertorio.field.choices %}
+                            <option value="{{ value }}" {% if fs_form.tom_no_repertorio.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ fs_form.observacoes.id_for_label }}" class="form-label">Observações</label>
+                        <input type="text" name="{{ fs_form.observacoes.html_name }}" id="{{ fs_form.observacoes.id_for_label }}" value="{{ fs_form.observacoes.value|default:'' }}" class="form-input" placeholder="Obs...">
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <label style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--color-danger); cursor: pointer;">
+                            <input type="checkbox" name="{{ fs_form.DELETE.html_name }}" id="{{ fs_form.DELETE.id_for_label }}" {% if fs_form.DELETE.value %}checked{% endif %} hidden>
+                            <span class="btn btn-danger btn-sm" onclick="this.previousElementSibling.checked = !this.previousElementSibling.checked;">Remover</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem;">
+        <a href="{% url 'repertorios:repertorio_list' %}" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">Salvar</button>
+    </div>
+</form>
+{% endblock %}

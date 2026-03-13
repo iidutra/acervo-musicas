@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar PDF - {{ musica.titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_list' %}">Músicas</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_detail' musica.pk %}">{{ musica.titulo }}</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Adicionar PDF</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Adicionar PDF</h1>
+    <p class="page-subtitle">Música: {{ musica.titulo }}</p>
+</div>
+
+<div class="card" style="max-width: 42rem;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="form-error" style="margin-bottom: 1.5rem;">
+            <strong>Corrija os erros abaixo:</strong>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_arquivo" class="form-label">Arquivo PDF <span style="color: var(--color-danger);">*</span></label>
+            <label for="id_arquivo" class="form-file">
+                <svg class="form-file-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span class="form-file-text">Arraste um arquivo PDF ou clique para selecionar</span>
+                <span class="form-file-name"></span>
+                <input type="file" name="arquivo" id="id_arquivo" accept=".pdf" hidden>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label for="id_nome" class="form-label">Nome</label>
+            <input type="text" name="nome" id="id_nome" value="{{ form.nome.value|default:'' }}" class="form-input" placeholder="Nome descritivo do PDF">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="id_pagina_inicial" class="form-label">Página Inicial</label>
+                <input type="number" name="pagina_inicial" id="id_pagina_inicial" value="{{ form.pagina_inicial.value|default:'' }}" class="form-input" min="1" placeholder="1">
+            </div>
+            <div class="form-group">
+                <label for="id_pagina_final" class="form-label">Página Final</label>
+                <input type="number" name="pagina_final" id="id_pagina_final" value="{{ form.pagina_final.value|default:'' }}" class="form-input" min="1" placeholder="1">
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+            <a href="{% url 'musicas:musica_detail' musica.pk %}" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">Salvar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.querySelectorAll('.form-file input[type="file"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const nameEl = this.closest('.form-file').querySelector('.form-file-name');
+        if (this.files.length) {
+            nameEl.textContent = this.files[0].name;
+        }
+    });
+});
+</script>
+{% endblock %}

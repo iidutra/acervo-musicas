@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda Litúrgica - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Agenda</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Agenda Litúrgica</h1>
+    <a href="{% url 'agenda:celebracao_create' %}" class="btn btn-primary">+ Nova Celebração</a>
+</div>
+
+<!-- Month Navigation -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="?mes={{ prev_mes }}&ano={{ prev_ano }}" class="btn btn-ghost btn-sm">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <h2 style="font-size: 1.25rem; font-weight: 600;">{{ nome_mes }} {{ ano }}</h2>
+        <a href="?mes={{ next_mes }}&ano={{ next_ano }}" class="btn btn-ghost btn-sm">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+</div>
+
+<!-- Calendar Grid -->
+<div class="card" style="padding: 0; overflow: hidden; margin-bottom: 1.5rem;">
+    <!-- Header -->
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--color-border); background: var(--color-bg-secondary, #f9fafb);">
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Dom</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Seg</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Ter</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Qua</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Qui</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Sex</div>
+        <div style="padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 500;">Sáb</div>
+    </div>
+
+    <!-- Weeks -->
+    {% for week in weeks %}
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--color-border);">
+        {% for cell in week %}
+        <div class="calendar-cell {% if cell.is_today %}today{% endif %}" style="min-height: 6rem; padding: 0.25rem; border-right: 1px solid var(--color-border); {% if cell.day == 0 %}background: var(--color-bg-secondary, #f9fafb);{% endif %}">
+            {% if cell.day != 0 %}
+            <span style="font-size: 0.875rem; font-weight: 500; {% if cell.is_today %}color: var(--color-primary);{% endif %}">{{ cell.day }}</span>
+            {% for cel in cell.celebracoes %}
+            <a href="{% url 'agenda:celebracao_detail' cel.pk %}" class="calendar-event {% if cel.tipo_celebracao == 'missa_dominical' %}badge-primary{% elif cel.tipo_celebracao == 'adoracao' %}badge-warning{% elif cel.tipo_celebracao == 'retiro' %}badge-success{% else %}badge-gray{% endif %}" title="{{ cel.titulo }}">
+                {{ cel.titulo|truncatechars:20 }}
+            </a>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Legend -->
+<div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; font-size: 0.75rem;">
+    <span><span class="badge badge-primary" style="font-size: 0.625rem;">&#9679;</span> Missa Dominical</span>
+    <span><span class="badge badge-warning" style="font-size: 0.625rem;">&#9679;</span> Adoração</span>
+    <span><span class="badge badge-success" style="font-size: 0.625rem;">&#9679;</span> Retiro</span>
+    <span><span class="badge badge-gray" style="font-size: 0.625rem;">&#9679;</span> Outros</span>
+</div>
+
+<!-- Link to list view -->
+<div style="text-align: center;">
+    <a href="{% url 'agenda:celebracao_list' %}" style="font-size: 0.875rem; color: var(--color-primary);">Ver lista completa de celebrações</a>
+</div>
+{% endblock %}

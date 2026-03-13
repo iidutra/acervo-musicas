@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Repertórios - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Repertórios</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Repertórios {% if page_obj %}<span class="badge badge-gray">{{ page_obj.paginator.count }}</span>{% endif %}</h1>
+        <p class="page-subtitle">Gerencie os repertórios de celebrações.</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'repertorios:recomendacao' %}" class="btn btn-secondary">Recomendação</a>
+        <a href="{% url 'repertorios:repertorio_create' %}" class="btn btn-primary">+ Novo Repertório</a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<details class="filter-bar">
+    <summary>Filtros</summary>
+    <form method="get">
+        <div class="filter-grid">
+            <div class="form-group">
+                <label for="filter_q" class="form-label">Buscar</label>
+                <input type="text" name="q" id="filter_q" value="{{ request.GET.q|default:'' }}" class="form-input" placeholder="Buscar por nome...">
+            </div>
+            <div class="form-group">
+                <label for="filter_tipo" class="form-label">Tipo de Celebração</label>
+                <select name="tipo_celebracao" id="filter_tipo" class="form-input">
+                    <option value="">Todos os tipos</option>
+                    {% for value, label in tipos_celebracao %}
+                    <option value="{{ value }}" {% if request.GET.tipo_celebracao == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+            <a href="{% url 'repertorios:repertorio_list' %}" class="btn btn-ghost btn-sm">Limpar</a>
+        </div>
+    </form>
+</details>
+
+{% if object_list %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Músicas</th>
+                <th style="text-align: right;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for repertorio in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'repertorios:repertorio_detail' repertorio.pk %}" style="font-weight: 500; color: var(--color-primary);">{{ repertorio.nome }}</a>
+                </td>
+                <td>{{ repertorio.data_celebracao|date:"d/m/Y"|default:"--" }}</td>
+                <td><span class="badge badge-primary">{{ repertorio.get_tipo_celebracao_display }}</span></td>
+                <td>{{ repertorio.itens.count }}</td>
+                <td style="text-align: right;">
+                    <a href="{% url 'repertorios:repertorio_detail' repertorio.pk %}" class="btn btn-ghost btn-sm">Ver</a>
+                    <a href="{% url 'repertorios:repertorio_update' repertorio.pk %}" class="btn btn-ghost btn-sm">Editar</a>
+                    <a href="{% url 'repertorios:repertorio_delete' repertorio.pk %}" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir este repertório?">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-ghost btn-sm">&laquo; Anterior</a>
+    {% endif %}
+    <span style="font-size: 0.875rem; color: var(--color-text-secondary);">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-ghost btn-sm">Próxima &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+    </div>
+    <h3 class="empty-state-title">Nenhum repertório encontrado</h3>
+    <p class="empty-state-text">Comece criando um novo repertório.</p>
+    <a href="{% url 'repertorios:repertorio_create' %}" class="btn btn-primary">+ Novo Repertório</a>
+</div>
+{% endif %}
+{% endblock %}

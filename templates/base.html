@@ -1,0 +1,213 @@
+{% load static %}
+{% load core_tags %}
+<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Acervo Litúrgico{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body class="h-full bg-gray-50">
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+    <!-- Toast container (JS fills dynamically) -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Django messages as data attributes for JS toast conversion -->
+    {% if messages %}
+    {% for message in messages %}
+    <div data-django-message="{{ message.tags }}" class="hidden">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <div class="min-h-full flex">
+        <!-- Desktop Sidebar -->
+        <aside id="sidebar" class="hidden lg:flex lg:flex-shrink-0">
+            <div class="w-64 bg-indigo-800 text-white flex flex-col">
+                <div class="p-5 border-b border-indigo-700">
+                    <h1 class="text-lg font-bold tracking-tight">Acervo Litúrgico</h1>
+                    <p class="text-indigo-300 text-xs mt-0.5 uppercase tracking-wider">Digital</p>
+                </div>
+                <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                    <a href="{% url 'core:dashboard' %}" class="sidebar-link {% active_nav 'core:dashboard' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'musicas:musica_list' %}" class="sidebar-link {% active_nav 'musicas:musica_list' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        Músicas
+                    </a>
+                    <a href="{% url 'musicas:categoria_list' %}" class="sidebar-link {% active_nav 'musicas:categoria_list' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        Categorias
+                    </a>
+                    <a href="{% url 'musicas:tag_list' %}" class="sidebar-link {% active_nav 'musicas:tag_list' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                        Tags
+                    </a>
+                    <a href="{% url 'repertorios:repertorio_list' %}" class="sidebar-link {% active_nav 'repertorios:repertorio_list' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Repertórios
+                    </a>
+                    <a href="{% url 'agenda:agenda' %}" class="sidebar-link {% active_nav 'agenda:agenda' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Agenda
+                    </a>
+                    <a href="{% url 'integracoes:pesquisar' %}" class="sidebar-link {% active_nav 'integracoes:pesquisar' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Pesquisar
+                    </a>
+                    <hr class="border-indigo-700 my-3">
+                    <a href="{% url 'importacao_exportacao:importar' %}" class="sidebar-link {% active_nav 'importacao_exportacao:importar' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Importar
+                    </a>
+                    <a href="{% url 'importacao_exportacao:exportar' %}" class="sidebar-link {% active_nav 'importacao_exportacao:exportar' %}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Exportar
+                    </a>
+                </nav>
+                <div class="p-4 border-t border-indigo-700">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
+                            {{ user.get_full_name|default:user.username|make_list|first|upper }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-white truncate">{{ user.get_full_name|default:user.username }}</p>
+                            <a href="{% url 'logout' %}" class="text-xs text-indigo-400 hover:text-white transition-colors">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main content area -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Mobile top bar -->
+            <header class="lg:hidden bg-indigo-800 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+                <button id="menu-toggle" class="p-1 rounded-md text-indigo-200 hover:text-white hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400" aria-label="Abrir menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <h1 class="text-lg font-bold tracking-tight">Acervo Litúrgico</h1>
+                <a href="{% url 'logout' %}" class="text-indigo-300 hover:text-white text-sm transition-colors">Sair</a>
+            </header>
+
+            <!-- Mobile sidebar overlay -->
+            <div id="mobile-sidebar" class="hidden fixed inset-0 z-40 lg:hidden">
+                <div class="sidebar-overlay" id="sidebar-overlay"></div>
+                <div class="sidebar-panel">
+                    <div class="flex items-center justify-between p-4 border-b border-indigo-700">
+                        <span class="text-lg font-bold text-white">Menu</span>
+                        <button id="close-sidebar" class="p-1 rounded-md text-indigo-200 hover:text-white hover:bg-indigo-700 transition-colors" aria-label="Fechar menu">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <nav class="flex-1 px-3 py-4 space-y-1 text-white overflow-y-auto">
+                        <a href="{% url 'core:dashboard' %}" class="sidebar-link {% active_nav 'core:dashboard' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            Dashboard
+                        </a>
+                        <a href="{% url 'musicas:musica_list' %}" class="sidebar-link {% active_nav 'musicas:musica_list' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                            Músicas
+                        </a>
+                        <a href="{% url 'musicas:categoria_list' %}" class="sidebar-link {% active_nav 'musicas:categoria_list' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                            Categorias
+                        </a>
+                        <a href="{% url 'musicas:tag_list' %}" class="sidebar-link {% active_nav 'musicas:tag_list' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                            Tags
+                        </a>
+                        <a href="{% url 'repertorios:repertorio_list' %}" class="sidebar-link {% active_nav 'repertorios:repertorio_list' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Repertórios
+                        </a>
+                        <a href="{% url 'agenda:agenda' %}" class="sidebar-link {% active_nav 'agenda:agenda' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Agenda
+                        </a>
+                        <hr class="border-indigo-700 my-3">
+                        <a href="{% url 'importacao_exportacao:importar' %}" class="sidebar-link {% active_nav 'importacao_exportacao:importar' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Importar
+                        </a>
+                        <a href="{% url 'importacao_exportacao:exportar' %}" class="sidebar-link {% active_nav 'importacao_exportacao:exportar' %}">
+                            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Exportar
+                        </a>
+                    </nav>
+                    <div class="p-4 border-t border-indigo-700">
+                        <div class="flex items-center gap-3 text-white">
+                            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-medium flex-shrink-0">
+                                {{ user.get_full_name|default:user.username|make_list|first|upper }}
+                            </div>
+                            <span class="text-sm truncate">{{ user.get_full_name|default:user.username }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breadcrumb -->
+            {% block breadcrumb %}{% endblock %}
+
+            <!-- Page content -->
+            <main id="main-content" class="flex-1 p-4 sm:p-6">
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="bg-white border-t px-6 py-4 text-center text-sm text-gray-400">
+                Acervo Litúrgico Digital &copy; {% now "Y" %}
+            </footer>
+        </div>
+    </div>
+    {% else %}
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            {% block auth_content %}{% endblock %}
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        // Mobile sidebar toggle
+        (function() {
+            var menuToggle = document.getElementById('menu-toggle');
+            var mobileSidebar = document.getElementById('mobile-sidebar');
+            var closeSidebar = document.getElementById('close-sidebar');
+            var sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            function openSidebar() {
+                if (mobileSidebar) {
+                    mobileSidebar.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeSidebarFn() {
+                if (mobileSidebar) {
+                    mobileSidebar.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            if (menuToggle) menuToggle.addEventListener('click', openSidebar);
+            if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarFn);
+            if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarFn);
+
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileSidebar && !mobileSidebar.classList.contains('hidden')) {
+                    closeSidebarFn();
+                }
+            });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Exportar Acervo - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Exportar</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Exportar Acervo</h1>
+    <p class="page-subtitle">Exporte o acervo de músicas em diferentes formatos.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <!-- Form -->
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="form-error" style="margin-bottom: 1.5rem;">
+                <strong>Corrija os erros abaixo:</strong>
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_formato" class="form-label">Formato <span style="color: var(--color-danger);">*</span></label>
+                <select name="formato" id="id_formato" class="form-input">
+                    {% for value, label in form.formato.field.choices %}
+                    <option value="{{ value }}" {% if form.formato.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="incluir_midias" id="id_incluir_midias" {% if form.incluir_midias.value %}checked{% endif %}>
+                    <span class="form-label" style="margin: 0;">Incluir mídias</span>
+                </label>
+                <p class="form-help">Disponível apenas para o formato ZIP. Inclui arquivos de áudio, PDFs e cifras.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="id_filtro_ativo" class="form-label">Filtro de Status</label>
+                <select name="filtro_ativo" id="id_filtro_ativo" class="form-input">
+                    <option value="todos" {% if form.filtro_ativo.value == 'todos' %}selected{% endif %}>Todos</option>
+                    <option value="ativos" {% if form.filtro_ativo.value == 'ativos' %}selected{% endif %}>Ativos</option>
+                    <option value="inativos" {% if form.filtro_ativo.value == 'inativos' %}selected{% endif %}>Inativos</option>
+                </select>
+            </div>
+
+            <div style="padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-loading-text="Exportando...">Exportar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Format Info -->
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="card" style="border-left: 3px solid var(--color-primary);">
+            <h4 style="font-weight: 600; margin-bottom: 0.25rem;">CSV / Excel</h4>
+            <p style="font-size: 0.875rem; color: var(--color-text-secondary);">Catálogo com dados principais das músicas. Ideal para visualização em planilhas e compartilhamento simples.</p>
+        </div>
+
+        <div class="card" style="border-left: 3px solid var(--color-warning, #eab308);">
+            <h4 style="font-weight: 600; margin-bottom: 0.25rem;">JSON</h4>
+            <p style="font-size: 0.875rem; color: var(--color-text-secondary);">Backup completo para restauração. Contém todos os dados estruturados do acervo, ideal para migração ou backup.</p>
+        </div>
+
+        <div class="card" style="border-left: 3px solid var(--color-success);">
+            <h4 style="font-weight: 600; margin-bottom: 0.25rem;">ZIP</h4>
+            <p style="font-size: 0.875rem; color: var(--color-text-secondary);">Catálogo completo + arquivos de mídia próprios (PDFs, áudios, cifras). Pacote completo para backup ou transferência.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

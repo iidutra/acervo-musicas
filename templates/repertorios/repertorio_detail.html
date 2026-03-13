@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ repertorio.nome }} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'repertorios:repertorio_list' %}">Repertórios</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ repertorio.nome }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- Header Card -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h1 class="page-title">{{ repertorio.nome }}</h1>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.875rem; color: var(--color-text-secondary);">{{ repertorio.data_celebracao|date:"d/m/Y"|default:"Data não definida" }}</span>
+        <span class="badge badge-primary">{{ repertorio.get_tipo_celebracao_display }}</span>
+    </div>
+    {% if repertorio.observacoes %}
+    <p style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--color-text-secondary); font-style: italic;">{{ repertorio.observacoes }}</p>
+    {% endif %}
+</div>
+
+<!-- Músicas do Repertório -->
+<div class="section-header">
+    <h2 class="section-title">Músicas do Repertório</h2>
+    <span class="section-count">{{ repertorio.itens.all|length }}</span>
+</div>
+
+{% if repertorio.itens.all %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 3rem;">#</th>
+                <th>Música</th>
+                <th>Categoria</th>
+                <th>Tom</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in repertorio.itens.all %}
+            <tr>
+                <td style="font-weight: 500;">{{ item.ordem }}</td>
+                <td>
+                    <a href="{% url 'musicas:musica_detail' item.musica.pk %}" style="font-weight: 500; color: var(--color-primary);">{{ item.musica.titulo }}</a>
+                </td>
+                <td>{{ item.categoria_no_repertorio.nome|default:"-" }}</td>
+                <td>{{ item.tom_efetivo|default:"-" }}</td>
+                <td style="max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.observacoes|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <h3 class="empty-state-title">Nenhuma música adicionada</h3>
+    <p class="empty-state-text">Este repertório ainda não possui músicas.</p>
+</div>
+{% endif %}
+
+<!-- Actions -->
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.5rem;">
+    <a href="{% url 'repertorios:repertorio_update' repertorio.pk %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'repertorios:repertorio_print' repertorio.pk %}" class="btn btn-secondary">Imprimir</a>
+    <a href="{% url 'repertorios:repertorio_delete' repertorio.pk %}" class="btn btn-danger" data-confirm="Tem certeza que deseja excluir este repertório?">Excluir</a>
+    <a href="{% url 'repertorios:repertorio_list' %}" class="btn btn-ghost">Voltar</a>
+</div>
+{% endblock %}

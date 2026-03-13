@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ celebracao.titulo }} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'agenda:agenda' %}">Agenda</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ celebracao.titulo }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- Header Card -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+        <div>
+            <h1 class="page-title">{{ celebracao.titulo }}</h1>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                <span style="font-size: 0.875rem; color: var(--color-text-secondary);">{{ celebracao.data|date:"d/m/Y" }}</span>
+                <span class="badge {% if celebracao.tipo_celebracao == 'missa_dominical' %}badge-primary{% elif celebracao.tipo_celebracao == 'adoracao' %}badge-warning{% elif celebracao.tipo_celebracao == 'retiro' %}badge-success{% else %}badge-gray{% endif %}">
+                    {{ celebracao.get_tipo_celebracao_display }}
+                </span>
+                {% if celebracao.data_passada %}
+                <span class="badge badge-gray">Passada</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Grid -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <div class="card">
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase;">Horário</h3>
+                <p style="margin-top: 0.25rem;">{% if celebracao.horario %}{{ celebracao.horario|time:"H:i" }}{% else %}&mdash;{% endif %}</p>
+            </div>
+            <div>
+                <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase;">Local</h3>
+                <p style="margin-top: 0.25rem;">{% if celebracao.local %}{{ celebracao.local }}{% else %}&mdash;{% endif %}</p>
+            </div>
+            <div>
+                <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase;">Celebrante</h3>
+                <p style="margin-top: 0.25rem;">{% if celebracao.celebrante %}{{ celebracao.celebrante }}{% else %}&mdash;{% endif %}</p>
+            </div>
+            <div>
+                <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase;">Tempo Litúrgico</h3>
+                <p style="margin-top: 0.25rem;">
+                    {% if celebracao.tempo_liturgico %}
+                    {{ celebracao.tempo_liturgico }}
+                    {% else %}&mdash;{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repertório Section -->
+    <div class="card">
+        <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Repertório</h3>
+        {% if celebracao.repertorio %}
+        <a href="{% url 'repertorios:repertorio_detail' celebracao.repertorio.pk %}" style="font-weight: 500; color: var(--color-primary); display: block; margin-bottom: 0.75rem;">
+            {{ celebracao.repertorio }}
+        </a>
+        {% if celebracao.repertorio.itens.exists %}
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.25rem;">
+            {% for item in celebracao.repertorio.itens.all %}
+            <li style="font-size: 0.875rem;">
+                <span style="color: var(--color-text-tertiary);">{{ forloop.counter }}.</span>
+                {{ item.musica.titulo }}
+                {% if item.momento %}
+                <span style="font-size: 0.75rem; color: var(--color-text-secondary);">({{ item.get_momento_display }})</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% else %}
+        <p style="color: var(--color-text-secondary); font-size: 0.875rem;">Nenhum repertório vinculado.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Observacoes -->
+{% if celebracao.observacoes %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 0.75rem; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Observações</h3>
+    <p style="white-space: pre-line;">{{ celebracao.observacoes }}</p>
+</div>
+{% endif %}
+
+<!-- Actions -->
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+    <a href="{% url 'agenda:celebracao_update' celebracao.pk %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'agenda:celebracao_delete' celebracao.pk %}" class="btn btn-danger" data-confirm="Tem certeza que deseja excluir esta celebração?">Excluir</a>
+    <a href="{% url 'agenda:agenda' %}" class="btn btn-ghost">Voltar</a>
+</div>
+{% endblock %}

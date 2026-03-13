@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Celebrações - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'agenda:agenda' %}">Agenda</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Lista</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Celebrações</h1>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'agenda:agenda' %}" class="btn btn-secondary">Calendário</a>
+        <a href="{% url 'agenda:celebracao_create' %}" class="btn btn-primary">+ Nova Celebração</a>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Tipo</th>
+                <th>Tempo Litúrgico</th>
+                <th>Repertório</th>
+                <th style="text-align: right;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cel in celebracoes %}
+            <tr>
+                <td>
+                    <a href="{% url 'agenda:celebracao_detail' cel.pk %}" style="font-weight: 500; color: var(--color-primary);">{{ cel.titulo }}</a>
+                </td>
+                <td>{{ cel.data|date:"d/m/Y" }}</td>
+                <td>{% if cel.horario %}{{ cel.horario|time:"H:i" }}{% else %}&mdash;{% endif %}</td>
+                <td>
+                    <span class="badge {% if cel.tipo_celebracao == 'missa_dominical' %}badge-primary{% elif cel.tipo_celebracao == 'adoracao' %}badge-warning{% elif cel.tipo_celebracao == 'retiro' %}badge-success{% else %}badge-gray{% endif %}">
+                        {{ cel.get_tipo_celebracao_display }}
+                    </span>
+                </td>
+                <td>{% if cel.tempo_liturgico %}{{ cel.tempo_liturgico }}{% else %}&mdash;{% endif %}</td>
+                <td>
+                    {% if cel.repertorio %}
+                    <a href="{% url 'repertorios:repertorio_detail' cel.repertorio.pk %}" style="color: var(--color-primary);">{{ cel.repertorio }}</a>
+                    {% else %}
+                    &mdash;
+                    {% endif %}
+                </td>
+                <td style="text-align: right;">
+                    <a href="{% url 'agenda:celebracao_update' cel.pk %}" class="btn btn-ghost btn-sm">Editar</a>
+                    <a href="{% url 'agenda:celebracao_delete' cel.pk %}" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir esta celebração?">Excluir</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <h3 class="empty-state-title">Nenhuma celebração encontrada</h3>
+                        <p class="empty-state-text">Cadastre uma nova celebração para começar.</p>
+                        <a href="{% url 'agenda:celebracao_create' %}" class="btn btn-primary">+ Nova Celebração</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-ghost btn-sm">&laquo; Anterior</a>
+    {% endif %}
+    <span style="font-size: 0.875rem; color: var(--color-text-secondary);">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-ghost btn-sm">Próxima &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

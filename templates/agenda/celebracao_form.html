@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Editar Celebração{% else %}Nova Celebração{% endif %} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'agenda:agenda' %}">Agenda</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{% if object %}Editar{% else %}Nova{% endif %}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{% if object %}Editar Celebração{% else %}Nova Celebração{% endif %}</h1>
+</div>
+
+<div class="card" style="max-width: 48rem;">
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="form-error" style="margin-bottom: 1.5rem;">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Título (full width) -->
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="{{ form.titulo.id_for_label }}" class="form-label">Título <span style="color: var(--color-danger);">*</span></label>
+                <input type="text" name="titulo" id="{{ form.titulo.id_for_label }}" value="{{ form.titulo.value|default:'' }}" class="form-input" required>
+                {% if form.titulo.errors %}
+                <p class="form-error">{{ form.titulo.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Data -->
+            <div class="form-group">
+                <label for="{{ form.data.id_for_label }}" class="form-label">Data <span style="color: var(--color-danger);">*</span></label>
+                <input type="date" name="data" id="{{ form.data.id_for_label }}" value="{{ form.data.value|default:'' }}" class="form-input" required>
+                {% if form.data.errors %}
+                <p class="form-error">{{ form.data.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Horário -->
+            <div class="form-group">
+                <label for="{{ form.horario.id_for_label }}" class="form-label">Horário</label>
+                <input type="time" name="horario" id="{{ form.horario.id_for_label }}" value="{{ form.horario.value|default:'' }}" class="form-input">
+                {% if form.horario.errors %}
+                <p class="form-error">{{ form.horario.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Tipo de Celebração -->
+            <div class="form-group">
+                <label for="{{ form.tipo_celebracao.id_for_label }}" class="form-label">Tipo de Celebração</label>
+                <select name="tipo_celebracao" id="{{ form.tipo_celebracao.id_for_label }}" class="form-input">
+                    {% for value, label in form.tipo_celebracao.field.choices %}
+                    <option value="{{ value }}" {% if form.tipo_celebracao.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.tipo_celebracao.errors %}
+                <p class="form-error">{{ form.tipo_celebracao.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Tempo Litúrgico -->
+            <div class="form-group">
+                <label for="{{ form.tempo_liturgico.id_for_label }}" class="form-label">Tempo Litúrgico</label>
+                <select name="tempo_liturgico" id="{{ form.tempo_liturgico.id_for_label }}" class="form-input">
+                    {% for value, label in form.tempo_liturgico.field.choices %}
+                    <option value="{{ value }}" {% if form.tempo_liturgico.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.tempo_liturgico.errors %}
+                <p class="form-error">{{ form.tempo_liturgico.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Local -->
+            <div class="form-group">
+                <label for="{{ form.local.id_for_label }}" class="form-label">Local</label>
+                <input type="text" name="local" id="{{ form.local.id_for_label }}" value="{{ form.local.value|default:'' }}" class="form-input">
+                {% if form.local.errors %}
+                <p class="form-error">{{ form.local.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Celebrante -->
+            <div class="form-group">
+                <label for="{{ form.celebrante.id_for_label }}" class="form-label">Celebrante</label>
+                <input type="text" name="celebrante" id="{{ form.celebrante.id_for_label }}" value="{{ form.celebrante.value|default:'' }}" class="form-input">
+                {% if form.celebrante.errors %}
+                <p class="form-error">{{ form.celebrante.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Repertório (full width) -->
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="{{ form.repertorio.id_for_label }}" class="form-label">Repertório</label>
+                <select name="repertorio" id="{{ form.repertorio.id_for_label }}" class="form-input">
+                    {% for value, label in form.repertorio.field.choices %}
+                    <option value="{{ value }}" {% if form.repertorio.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.repertorio.errors %}
+                <p class="form-error">{{ form.repertorio.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Observações (full width) -->
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações</label>
+                <textarea name="observacoes" id="{{ form.observacoes.id_for_label }}" rows="3" class="form-input">{{ form.observacoes.value|default:'' }}</textarea>
+                {% if form.observacoes.errors %}
+                <p class="form-error">{{ form.observacoes.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+            <a href="{% url 'agenda:agenda' %}" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">
+                {% if object %}Salvar Alterações{% else %}Criar Celebração{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Editar Música{% else %}Nova Música{% endif %} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_list' %}">Músicas</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{% if form.instance.pk %}Editar "{{ form.instance.titulo }}"{% else %}Nova Música{% endif %}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if form.instance.pk %}Editar Música{% else %}Nova Música{% endif %}</h1>
+        <p class="page-subtitle">{% if form.instance.pk %}Atualize os dados da música.{% else %}Preencha os dados para cadastrar uma nova música.{% endif %}</p>
+    </div>
+</div>
+
+<div class="card" style="max-width:800px;">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+        <div style="background:var(--color-danger-light);border:1px solid #fecaca;border-radius:var(--radius-md);padding:0.75rem 1rem;margin-bottom:1.5rem;">
+            {% for error in form.non_field_errors %}
+            <p class="form-error" style="margin:0;">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Section: Informações Básicas -->
+        <fieldset style="border:none;padding:0;margin:0 0 2rem;">
+            <legend style="font-size:1rem;font-weight:600;color:var(--color-text);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--color-border);width:100%;">Informações Básicas</legend>
+
+            <div class="form-group">
+                <label for="id_titulo" class="form-label">Título <span class="required">*</span></label>
+                <input type="text" name="titulo" id="id_titulo" value="{{ form.titulo.value|default:'' }}" class="form-input{% if form.titulo.errors %} is-invalid{% endif %}" required>
+                {% for error in form.titulo.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_subtitulo" class="form-label">Subtítulo</label>
+                <input type="text" name="subtitulo" id="id_subtitulo" value="{{ form.subtitulo.value|default:'' }}" class="form-input{% if form.subtitulo.errors %} is-invalid{% endif %}">
+                {% for error in form.subtitulo.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;">
+                <div class="form-group">
+                    <label for="id_tom_principal" class="form-label">Tom Principal</label>
+                    <select name="tom_principal" id="id_tom_principal" class="form-input{% if form.tom_principal.errors %} is-invalid{% endif %}">
+                        {% for value, label in form.tom_principal.field.choices %}
+                        <option value="{{ value }}" {% if form.tom_principal.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.tom_principal.errors %}
+                    <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="id_andamento" class="form-label">Andamento</label>
+                    <input type="text" name="andamento" id="id_andamento" value="{{ form.andamento.value|default:'' }}" placeholder="Ex: Moderado" class="form-input{% if form.andamento.errors %} is-invalid{% endif %}">
+                    {% for error in form.andamento.errors %}
+                    <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="id_compasso" class="form-label">Compasso</label>
+                    <input type="text" name="compasso" id="id_compasso" value="{{ form.compasso.value|default:'' }}" placeholder="Ex: 4/4" class="form-input{% if form.compasso.errors %} is-invalid{% endif %}">
+                    {% for error in form.compasso.errors %}
+                    <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Section: Letra -->
+        <fieldset style="border:none;padding:0;margin:0 0 2rem;">
+            <legend style="font-size:1rem;font-weight:600;color:var(--color-text);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--color-border);width:100%;">Letra</legend>
+
+            <div class="form-group">
+                <label for="id_letra" class="form-label">Letra da música</label>
+                <textarea name="letra" id="id_letra" rows="12" class="form-input{% if form.letra.errors %} is-invalid{% endif %}" style="font-family:monospace;resize:vertical;" placeholder="Cole a letra da música aqui...">{{ form.letra.value|default:'' }}</textarea>
+                {% for error in form.letra.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Section: Classificação -->
+        <fieldset style="border:none;padding:0;margin:0 0 2rem;">
+            <legend style="font-size:1rem;font-weight:600;color:var(--color-text);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--color-border);width:100%;">Classificação</legend>
+
+            <div class="form-group">
+                <label class="form-label">Categorias Litúrgicas</label>
+                <div class="checkbox-grid">
+                    {% for checkbox in form.categorias %}
+                    <label class="checkbox-item">
+                        {{ checkbox.tag }}
+                        <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for error in form.categorias.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tags</label>
+                <div class="checkbox-grid">
+                    {% for checkbox in form.tags %}
+                    <label class="checkbox-item">
+                        {{ checkbox.tag }}
+                        <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for error in form.tags.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Section: Outros -->
+        <fieldset style="border:none;padding:0;margin:0 0 2rem;">
+            <legend style="font-size:1rem;font-weight:600;color:var(--color-text);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--color-border);width:100%;">Outros</legend>
+
+            <div class="form-group">
+                <label for="id_observacoes" class="form-label">Observações</label>
+                <textarea name="observacoes" id="id_observacoes" rows="3" class="form-input{% if form.observacoes.errors %} is-invalid{% endif %}" placeholder="Observações opcionais...">{{ form.observacoes.value|default:'' }}</textarea>
+                {% for error in form.observacoes.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            {% if form.instance.pk %}
+            <div class="form-group">
+                <label for="id_origem" class="form-label">Origem</label>
+                <select name="origem" id="id_origem" class="form-input{% if form.origem.errors %} is-invalid{% endif %}">
+                    {% for value, label in form.origem.field.choices %}
+                    <option value="{{ value }}" {% if form.origem.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% for error in form.origem.errors %}
+                <p class="form-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </fieldset>
+
+        <!-- Actions -->
+        <div style="display:flex;align-items:center;gap:0.75rem;padding-top:1.5rem;border-top:1px solid var(--color-border);">
+            <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Salvar
+            </button>
+            <a href="{% if form.instance.pk %}{% url 'musicas:musica_detail' form.instance.pk %}{% else %}{% url 'musicas:musica_list' %}{% endif %}" class="btn btn-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

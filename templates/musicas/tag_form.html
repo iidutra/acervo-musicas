@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Editar Tag{% else %}Nova Tag{% endif %} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:tag_list' %}">Tags</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{% if form.instance.pk %}Editar "{{ form.instance.nome }}"{% else %}Nova Tag{% endif %}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if form.instance.pk %}Editar Tag{% else %}Nova Tag{% endif %}</h1>
+        <p class="page-subtitle">{% if form.instance.pk %}Atualize o nome da tag.{% else %}Informe o nome para a nova tag.{% endif %}</p>
+    </div>
+</div>
+
+<div class="card" style="max-width:480px;">
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background:var(--color-danger-light);border:1px solid #fecaca;border-radius:var(--radius-md);padding:0.75rem 1rem;margin-bottom:1.5rem;">
+            {% for error in form.non_field_errors %}
+            <p class="form-error" style="margin:0;">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_nome" class="form-label">Nome <span class="required">*</span></label>
+            <input type="text" name="nome" id="id_nome" value="{{ form.nome.value|default:'' }}" class="form-input{% if form.nome.errors %} is-invalid{% endif %}" required autofocus>
+            {% for error in form.nome.errors %}
+            <p class="form-error">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.75rem;padding-top:1.5rem;border-top:1px solid var(--color-border);">
+            <button type="submit" class="btn btn-primary" data-loading-text="Salvando...">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                Salvar
+            </button>
+            <a href="{% url 'musicas:tag_list' %}" class="btn btn-ghost">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

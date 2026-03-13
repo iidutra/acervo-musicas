@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}{{ musica.titulo }} - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'musicas:musica_list' %}">Músicas</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">{{ musica.titulo }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- Header Card -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:1rem;">
+        <div style="flex:1;min-width:0;">
+            <h1 class="page-title" style="margin-bottom:0.25rem;">{{ musica.titulo }}</h1>
+            {% if musica.subtitulo %}
+            <p class="page-subtitle" style="font-size:1.05rem;">{{ musica.subtitulo }}</p>
+            {% endif %}
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">
+                {% for cat in musica.categorias.all %}
+                <span class="badge badge-primary">{{ cat.nome }}</span>
+                {% endfor %}
+                {% for tag in musica.tags.all %}
+                <span class="badge badge-gray">{{ tag.nome }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div style="flex-shrink:0;">
+            {% if musica.ativo %}
+            <span class="badge badge-success" style="font-size:0.8rem;padding:0.25rem 0.75rem;">Ativo</span>
+            {% else %}
+            <span class="badge badge-danger" style="font-size:0.8rem;padding:0.25rem 0.75rem;">Inativo</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Info Grid -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.5rem;">
+        <div>
+            <p style="font-size:0.7rem;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Tom Principal</p>
+            <p style="font-size:1.5rem;font-weight:700;color:var(--color-primary);">{{ musica.get_tom_principal_display|default:"-" }}</p>
+        </div>
+        <div>
+            <p style="font-size:0.7rem;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Andamento</p>
+            <p style="font-size:0.95rem;color:var(--color-text);">{{ musica.andamento|default:"-" }}</p>
+        </div>
+        <div>
+            <p style="font-size:0.7rem;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Compasso</p>
+            <p style="font-size:0.95rem;color:var(--color-text);">{{ musica.compasso|default:"-" }}</p>
+        </div>
+        <div>
+            <p style="font-size:0.7rem;font-weight:600;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Origem</p>
+            <p style="font-size:0.95rem;color:var(--color-text);">{{ musica.get_origem_display|default:"-" }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Letra -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">Letra</h2>
+    </div>
+    {% if musica.letra %}
+    <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:1rem;font-size:0.875rem;color:var(--color-text);line-height:1.75;white-space:pre-wrap;">{{ musica.letra }}</div>
+    {% else %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+        <div class="empty-state-icon">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        </div>
+        <p class="empty-state-text" style="margin-bottom:0;">Letra não informada.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- PDFs -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">
+            PDFs
+            <span class="section-count">{{ musica.pdfs.count }}</span>
+        </h2>
+        <a href="{% url 'arquivos:pdf_create' musica_pk=musica.pk %}" class="btn btn-primary btn-sm">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Adicionar PDF
+        </a>
+    </div>
+    {% for pdf in musica.pdfs.all %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;{% if not forloop.last %}border-bottom:1px solid #f3f4f6;{% endif %}">
+        <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;flex:1;">
+            <div style="flex-shrink:0;background:var(--color-danger-light);border-radius:var(--radius-md);padding:0.5rem;">
+                <svg class="h-5 w-5" style="color:var(--color-danger);" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+            </div>
+            <div style="min-width:0;">
+                <p style="font-size:0.875rem;font-weight:500;color:var(--color-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pdf.nome }}</p>
+                <p style="font-size:0.75rem;color:var(--color-text-secondary);">{{ pdf.tamanho_formatado }}</p>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+            <a href="{{ pdf.arquivo.url }}" download class="btn btn-secondary btn-sm">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                Download
+            </a>
+            <form method="POST" action="{% url 'arquivos:pdf_delete' pdf.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir este PDF?">Excluir</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+        <p class="empty-state-text" style="margin-bottom:0;">Nenhum PDF adicionado.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Áudios -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">
+            Áudios
+            <span class="section-count">{{ musica.audios.count }}</span>
+        </h2>
+        <a href="{% url 'arquivos:audio_create' musica_pk=musica.pk %}" class="btn btn-primary btn-sm">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Adicionar Áudio
+        </a>
+    </div>
+    {% for audio in musica.audios.all %}
+    <div class="audio-card" style="{% if not forloop.first %}margin-top:0.75rem;{% endif %}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;width:100%;">
+            <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:0;">
+                <div style="flex-shrink:0;background:var(--color-success-light);border-radius:var(--radius-md);padding:0.5rem;">
+                    <svg class="h-5 w-5" style="color:var(--color-success);" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+                </div>
+                <div style="min-width:0;">
+                    <p style="font-size:0.875rem;font-weight:500;color:var(--color-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ audio.nome }}</p>
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.125rem;">
+                        <span class="badge badge-success" style="font-size:0.7rem;">{{ audio.get_tipo_display }}</span>
+                        {% if audio.duracao_formatada %}
+                        <span style="font-size:0.75rem;color:var(--color-text-secondary);">{{ audio.duracao_formatada }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="flex-shrink:0;">
+                <form method="POST" action="{% url 'arquivos:audio_delete' audio.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir este áudio?">Excluir</button>
+                </form>
+            </div>
+        </div>
+        <audio controls preload="metadata" style="width:100%;margin-top:0.75rem;">
+            <source src="{{ audio.arquivo.url }}">
+            Seu navegador não suporta o player de áudio.
+        </audio>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+        <p class="empty-state-text" style="margin-bottom:0;">Nenhum áudio adicionado.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Links Externos -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">
+            Links Externos
+            <span class="section-count">{{ musica.links_externos.count }}</span>
+        </h2>
+        <a href="{% url 'arquivos:link_create' musica_pk=musica.pk %}" class="btn btn-primary btn-sm">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Adicionar Link
+        </a>
+    </div>
+    {% for link in musica.links_externos.all %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;{% if not forloop.last %}border-bottom:1px solid #f3f4f6;{% endif %}">
+        <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;flex:1;">
+            <span class="badge {% if link.provider == 'youtube' %}badge-danger{% elif link.provider == 'spotify' %}badge-success{% elif link.provider == 'soundcloud' %}badge-warning{% elif link.provider == 'deezer' %}badge-info{% else %}badge-gray{% endif %}">
+                {{ link.get_provider_display }}
+            </span>
+            <p style="font-size:0.875rem;font-weight:500;color:var(--color-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">{{ link.titulo_externo|default:link.url }}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+            <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                Abrir
+            </a>
+            <form method="POST" action="{% url 'arquivos:link_delete' link.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir este link?">Excluir</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+        <p class="empty-state-text" style="margin-bottom:0;">Nenhum link externo adicionado.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Cifras -->
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">
+            Cifras
+            <span class="section-count">{{ musica.cifras.count }}</span>
+        </h2>
+        <a href="{% url 'arquivos:cifra_create' musica_pk=musica.pk %}" class="btn btn-primary btn-sm">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Adicionar Cifra
+        </a>
+    </div>
+    {% for cifra in musica.cifras.all %}
+    <div style="padding:1rem 0;{% if not forloop.last %}border-bottom:1px solid #f3f4f6;{% endif %}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.75rem;">
+            <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                    <span class="badge badge-primary">{{ cifra.get_tipo_cifra_display }}</span>
+                    {% if cifra.tom %}
+                    <span style="font-size:0.75rem;color:var(--color-text-secondary);">Tom: {{ cifra.get_tom_display }}</span>
+                    {% endif %}
+                </div>
+
+                {% if cifra.tipo_cifra == 'texto' %}
+                <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:0.75rem;font-size:0.75rem;color:var(--color-text-secondary);font-family:monospace;white-space:pre-wrap;max-height:120px;overflow:hidden;">{{ cifra.conteudo_texto|truncatechars:300 }}</div>
+                {% elif cifra.tipo_cifra == 'pdf' and cifra.arquivo_pdf %}
+                <a href="{{ cifra.arquivo_pdf.url }}" download class="btn btn-secondary btn-sm">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    Download PDF da Cifra
+                </a>
+                {% elif cifra.tipo_cifra == 'link' and cifra.link_referencia %}
+                <a href="{{ cifra.link_referencia }}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                    Abrir link da cifra
+                </a>
+                {% endif %}
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+                <a href="{% url 'arquivos:cifra_update' cifra.pk %}" class="btn btn-secondary btn-sm">Editar</a>
+                <form method="POST" action="{% url 'arquivos:cifra_delete' cifra.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" data-confirm="Tem certeza que deseja excluir esta cifra?">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:2rem 1rem;">
+        <p class="empty-state-text" style="margin-bottom:0;">Nenhuma cifra adicionada.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Observações -->
+{% if musica.observacoes %}
+<div class="card" style="margin-bottom:1.5rem;">
+    <div class="section-header">
+        <h2 class="section-title">Observações</h2>
+    </div>
+    <div style="font-size:0.875rem;color:var(--color-text);line-height:1.6;white-space:pre-wrap;">{{ musica.observacoes }}</div>
+</div>
+{% endif %}
+
+<!-- Bottom Sticky Action Bar -->
+<div class="sticky-actions" style="margin-top:1.5rem;border-radius:var(--radius-lg);">
+    <a href="{% url 'musicas:musica_update' musica.pk %}" class="btn btn-primary">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+        Editar
+    </a>
+    <form method="POST" action="{% url 'musicas:musica_toggle_ativo' musica.pk %}" style="display:inline;">
+        {% csrf_token %}
+        {% if musica.ativo %}
+        <button type="submit" class="btn btn-secondary">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            Inativar
+        </button>
+        {% else %}
+        <button type="submit" class="btn btn-success">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Ativar
+        </button>
+        {% endif %}
+    </form>
+    <a href="{% url 'musicas:musica_list' %}" class="btn btn-ghost">Voltar</a>
+</div>
+{% endblock %}

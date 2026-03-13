@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Recomendação de Repertório - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'repertorios:repertorio_list' %}">Repertórios</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Recomendação</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Recomendação de Repertório</h1>
+        <p class="page-subtitle">Sugestões de músicas para cada momento da celebração</p>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <form method="get" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; min-width: 12rem;">
+            <label class="form-label">Tipo de Celebração</label>
+            <select name="tipo_celebracao" class="form-input">
+                {% for value, label in tipo_celebracao_choices %}
+                <option value="{{ value }}" {% if value == tipo_celebracao %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 12rem;">
+            <label class="form-label">Tempo Litúrgico</label>
+            <select name="tempo_liturgico" class="form-input">
+                <option value="">Nenhum (geral)</option>
+                {% for value, label in tempo_liturgico_choices %}
+                <option value="{{ value }}" {% if value == tempo_liturgico %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary" data-loading-text="Recomendando...">Recomendar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Results -->
+{% for momento, sugestoes in recomendacoes.items %}
+<div class="card" style="margin-bottom: 1rem;">
+    <div class="section-header">
+        <h2 class="section-title" style="text-transform: capitalize;">{{ momento }}</h2>
+        <span class="section-count">{{ sugestoes|length }}</span>
+    </div>
+
+    {% if sugestoes %}
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem;">
+        {% for item in sugestoes %}
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid {% if forloop.first %}var(--color-primary-light, #c7d2fe){% else %}var(--color-border){% endif %}; {% if forloop.first %}background: var(--color-primary-bg, #eef2ff);{% endif %}">
+            <div style="flex: 1;">
+                <a href="{% url 'musicas:musica_detail' item.musica.pk %}" style="font-weight: 500; color: var(--color-text-primary);">{{ item.musica.titulo }}</a>
+                {% if item.musica.subtitulo %}
+                <span style="color: var(--color-text-secondary); font-size: 0.875rem; margin-left: 0.5rem;">{{ item.musica.subtitulo }}</span>
+                {% endif %}
+                <div style="margin-top: 0.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                    <span class="badge badge-gray">{{ item.musica.tom_principal }}</span>
+                    <span style="font-size: 0.75rem; color: var(--color-text-tertiary);">
+                        {% for razao in item.razoes %}{{ razao }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}
+                    </span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge {% if item.score >= 10 %}badge-success{% elif item.score >= 5 %}badge-warning{% else %}badge-gray{% endif %}">
+                    {{ item.score|floatformat:1 }} pts
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 2rem 0;">
+        <p class="empty-state-text">Nenhuma sugestão disponível para este momento. Cadastre músicas com a categoria "{{ momento }}".</p>
+    </div>
+    {% endif %}
+</div>
+{% empty %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+        </svg>
+    </div>
+    <h3 class="empty-state-title">Gere suas recomendações</h3>
+    <p class="empty-state-text">Selecione os filtros acima e clique em "Recomendar" para gerar sugestões.</p>
+</div>
+{% endfor %}
+{% endblock %}

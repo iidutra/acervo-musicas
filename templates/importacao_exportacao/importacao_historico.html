@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Importações - Acervo Litúrgico Digital{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb">
+    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href="{% url 'importacao_exportacao:importar' %}">Importar</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Histórico</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Histórico de Importações</h1>
+        <p class="page-subtitle">Acompanhe todas as importações realizadas.</p>
+    </div>
+    <a href="{% url 'importacao_exportacao:importar' %}" class="btn btn-primary">Nova Importação</a>
+</div>
+
+{% if object_list %}
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Arquivo</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Sucesso</th>
+                <th>Erros</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lote in object_list %}
+            <tr style="cursor: pointer;" onclick="window.location='{% url 'importacao_exportacao:importacao_resultado' lote.pk %}'">
+                <td>
+                    <a href="{% url 'importacao_exportacao:importacao_resultado' lote.pk %}" style="font-weight: 500; color: var(--color-primary);">{{ lote.nome_arquivo }}</a>
+                </td>
+                <td>{{ lote.get_tipo_importacao_display }}</td>
+                <td>
+                    {% if lote.status == 'concluido' %}
+                    <span class="badge badge-dot badge-success">Concluído</span>
+                    {% elif lote.status == 'erro' %}
+                    <span class="badge badge-dot badge-danger">Erro</span>
+                    {% elif lote.status == 'processando' %}
+                    <span class="badge badge-dot badge-warning">Processando</span>
+                    {% else %}
+                    <span class="badge badge-dot badge-gray">Pendente</span>
+                    {% endif %}
+                </td>
+                <td>{{ lote.total_registros }}</td>
+                <td style="color: var(--color-success); font-weight: 500;">{{ lote.total_sucesso }}</td>
+                <td style="{% if lote.total_erro > 0 %}color: var(--color-danger); font-weight: 500;{% endif %}">{{ lote.total_erro }}</td>
+                <td>{{ lote.criado_em|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-ghost btn-sm">&laquo; Anterior</a>
+    {% endif %}
+    <span style="font-size: 0.875rem; color: var(--color-text-secondary);">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-ghost btn-sm">Próxima &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="48" height="48">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        </svg>
+    </div>
+    <h3 class="empty-state-title">Nenhuma importação registrada</h3>
+    <p class="empty-state-text">Realize uma importação para ver o histórico.</p>
+    <a href="{% url 'importacao_exportacao:importar' %}" class="btn btn-primary">Nova Importação</a>
+</div>
+{% endif %}
+{% endblock %}
